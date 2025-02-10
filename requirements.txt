@@ -32,7 +32,7 @@ pip-requirements-parser==32.0.1
 pip_audit==2.8.0
 platformdirs==4.3.6
 psutil==6.1.1
-py-serializable==1.1.2
+py-serializable==2.0.0
 pycparser==2.22
 pydantic==2.9.2
 pydantic_core==2.23.4
