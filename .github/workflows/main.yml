@@ -22,10 +22,10 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run Bandit Security Scan
-        run: bandit -r ./ --severity-level all --confidence-level all --exit-zero
+        run: bandit -r ./ --severity-level high --confidence-level all
 
       - name: Run Pip Audit
         run: pip-audit
 
       - name: Run Safety Security Check
-        run: safety check -r requirements.txt
+        run: safety scan -r requirements.txt

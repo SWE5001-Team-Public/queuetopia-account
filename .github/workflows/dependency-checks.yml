@@ -28,4 +28,4 @@ jobs:
         run: pip-audit
 
       - name: Run Safety Security Check
-        run: safety check -r requirements.txt
+        run: safety scan -r requirements.txt
