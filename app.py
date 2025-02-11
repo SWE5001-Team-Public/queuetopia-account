@@ -44,7 +44,7 @@ def register(user: User):
   if user.email in users:
     return JSONResponse(
       status_code=400,
-      content={"error": "User already exists", "email": user.email}
+      content={"message": "User already exists", "email": user.email}
     )
 
   users[user.email] = user
@@ -66,7 +66,27 @@ def login(login_data: LoginRequest):
 
   return JSONResponse(
     status_code=401,
-    content={"error": "Invalid credentials", "email": login_data.email}
+    content={"message": "Invalid credentials", "email": login_data.email}
+  )
+
+
+@app.get("/profile/{email}")
+def get_profile(email: str):
+  user = users.get(email)
+
+  if not user:
+    return JSONResponse(
+      status_code=404,
+      content={"message": "User not found", "email": email}
+    )
+
+  return JSONResponse(
+    status_code=200,
+    content={
+      "email": user.email,
+      "first_name": user.first_name,
+      "last_name": user.last_name
+    }
   )
 
 
