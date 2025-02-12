@@ -1,0 +1,30 @@
+services:
+  account-manager:
+    container_name: account-manager
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    restart: always
+    depends_on:
+      - postgres
+    env_file:
+      - ../.env.local
+    command: [ 'python', 'app.py' ]
+
+  postgres:
+    container_name: account-mgr-db
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: account_mgr_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

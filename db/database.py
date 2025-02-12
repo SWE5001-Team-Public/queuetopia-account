@@ -20,8 +20,15 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
   raise ValueError("DATABASE_URL is not set. Check your .env file.")
 
-ssl_context = ssl.create_default_context()
-engine = create_async_engine(DATABASE_URL, echo=True, connect_args={"ssl": ssl_context})
+# Configure SSL context for production database (only if needed)
+ssl_context = ssl.create_default_context() if ENVIRONMENT == "prod" else None
+
+# Create async engine
+engine = create_async_engine(
+  DATABASE_URL,
+  echo=True,
+  connect_args={"ssl": ssl_context} if ssl_context else {}
+)
 
 SessionLocal = sessionmaker(
   autocommit=False,
