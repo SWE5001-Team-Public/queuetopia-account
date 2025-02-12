@@ -9,9 +9,10 @@ services:
     restart: always
     depends_on:
       - postgres
-    env_file:
-      - ../.env.local
-    command: [ 'python', 'app.py' ]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:password@postgres:5432/account_mgr_db
+      ENVIRONMENT: local
+    command: [ 'uvicorn', 'app:app', '--host', '0.0.0.0', '--port', '5000' ]
 
   postgres:
     container_name: account-mgr-db
