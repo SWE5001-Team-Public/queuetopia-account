@@ -4,11 +4,24 @@ set -e
 # Move to the project root (where Dockerfile is located)
 cd "$(dirname "$0")/.." || exit
 
+# Run down.sh first to stop and clean up existing containers
+echo "Stopping existing containers before starting fresh..."
+bash scripts/down.sh
+
+# Default compose file
+COMPOSE_FILE="scripts/docker-compose.yml"
+
+# Check for --dev flag
+if [[ "$1" == "--dev" ]]; then
+    COMPOSE_FILE="scripts/docker-compose-dev.yml"
+    echo "Using development docker-compose file: $COMPOSE_FILE"
+fi
+
 echo "Building the Docker image..."
 docker build -t account-manager .
 
-echo "Starting the Docker container..."
-docker-compose -f scripts/docker-compose.yml -p queuetopia up -d --build
+echo "Starting the Docker container with $COMPOSE_FILE..."
+docker-compose -f "$COMPOSE_FILE" -p queuetopia up -d --build
 
 echo "Checking running containers..."
 docker ps

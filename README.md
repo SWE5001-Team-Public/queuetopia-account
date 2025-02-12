@@ -1,6 +1,6 @@
 # Queuetopia Account Manager
 
-This project can be run **using Docker** or **directly as a Flask application**.
+This project can be run **using Docker** or **directly as a FastAPI application**.
 
 ---
 
@@ -14,7 +14,7 @@ Make sure you have the following installed:
 - [Docker Compose](https://docs.docker.com/compose/install/)
 - Bash (for running shell scripts)
 
-### **For Running Flask Locally (Without Docker)**
+### **For Running FastAPI Locally (Without Docker)**
 
 - Python 3.10+ installed ([Download Here](https://www.python.org/downloads/))
 - Pip (Python package manager)
@@ -30,19 +30,163 @@ To build and start the Docker container, run:
 ./scripts/up.sh
 ```
 
+### **🔹 Running in Development Mode (`--dev` Flag)**
+
+If you want to run the app using the **development Docker Compose file**, use:
+
+```sh
+./scripts/up.sh --dev
+```
+
 ### **🔹 What `up.sh` Does**
 
 1. Moves to the **project root directory** where the `Dockerfile` is located.
-2. Builds a Docker image named `account-manager`.
-3. Starts the container using `docker-compose.yml` from the `scripts/` directory.
-4. Runs the container **in detached mode (`-d`)** with the name `account-manager`.
-5. Lists all running containers.
+2. Calls `down.sh` to stop any existing containers.
+3. Builds a Docker image named `account-manager`.
+4. Starts the container using `docker-compose.yml` (or `docker-compose-dev.yml` when `--dev` is passed).
+5. Runs the container **in detached mode (`-d`)**.
+6. Lists all running containers.
 
 Once the script completes, the application will be running on:
 
 ```
 http://localhost:5000
 ```
+
+---
+
+## **🔹 Running the FastAPI Application Locally for Development**
+
+To run the FastAPI application locally **without Docker**, follow these steps:
+
+### **1️⃣ Download the `.env.local` File**
+
+Download the `.env.local` file
+from [Google Drive](https://drive.google.com/drive/folders/138NUTJS-QoB0TqtaK2kPsz5nduhE3Uei?usp=sharing) and place it
+in the project root.
+
+### **2️⃣ Create & Activate a Virtual Environment**
+
+Run these commands in the project root:
+
+```sh
+python -m venv venv
+source venv/bin/activate  # macOS/Linux
+venv\Scripts\activate  # Windows
+```
+
+### **3️⃣ Install Dependencies**
+
+With the virtual environment activated, install dependencies:
+
+```sh
+pip install -r requirements.txt
+```
+
+### **4️⃣ Run the FastAPI Application**
+
+Start the app by running:
+
+```sh
+uvicorn app:app --host 0.0.0.0 --port 5000 --reload
+```
+
+The FastAPI app should now be running at:
+
+```
+http://127.0.0.1:5000
+```
+
+---
+
+## **🔹 Deploying the Docker Container to AWS EC2**
+
+To deploy the application on an **AWS EC2 instance**, follow these steps:
+
+### **1️⃣ Connect to Your EC2 Instance**
+
+SSH into your EC2 instance:
+
+```sh
+ssh -i your-key.pem ec2-user@your-ec2-ip
+```
+
+### **2️⃣ Install Docker & Docker Compose**
+
+If not installed, run:
+
+```sh
+sudo yum update -y
+sudo yum install docker -y
+sudo systemctl start docker
+sudo usermod -aG docker ec2-user
+```
+
+Then install Docker Compose:
+
+```sh
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
+### **3️⃣ Clone the Repository**
+
+```sh
+git clone https://github.com/SWE5001-Team-Public/queuetopia-account/queuetopia-account.git # HTTPS
+git clone git@github.com:SWE5001-Team-Public/queuetopia-account.git # SSH
+cd queuetopia-account
+```
+
+### **4️⃣ Download the `.env.production` File**
+
+Download the `.env.production` file
+from [Google Drive](https://drive.google.com/drive/folders/138NUTJS-QoB0TqtaK2kPsz5nduhE3Uei?usp=sharing) and place it
+in the project root.
+
+### **5️⃣ Start the Docker Container**
+
+```sh
+./scripts/up.sh --dev
+```
+
+### **6️⃣ Check the Running Container**
+
+```sh
+docker ps
+```
+
+The app should now be running on `http://your-ec2-ip:5000`
+
+---
+
+## **🔹 Starting & Stopping the Database**
+
+### **Starting PostgreSQL (`db-up.sh`)**
+
+Run:
+
+```sh
+./scripts/db-up.sh
+```
+
+This script:
+
+1. Starts the PostgreSQL container defined in `docker-compose.yml`.
+2. Waits until PostgreSQL is ready before exiting.
+
+### **Stopping PostgreSQL (`db-down.sh`)**
+
+Run:
+
+```sh
+./scripts/db-down.sh
+```
+
+This script:
+
+1. Stops and removes the PostgreSQL container (`account-mgr-db`).
+2. Removes the associated Docker image.
+3. Cleans up unused Docker resources.
 
 ---
 
@@ -54,85 +198,12 @@ To stop and clean up the container and its image, run:
 ./scripts/down.sh
 ```
 
-### **🔹 What `down.sh` Does**
-
-1. Stops and removes the `account-manager` container.
-2. Removes the Docker image named `queuetopia-account-manager`.
-3. Cleans up unused Docker resources using:
-   ```sh
-   docker system prune -af
-   ```
-4. Lists all remaining containers.
-
----
-
-## **🔹 Running the Flask App Without Docker**
-
-If you want to run the app **directly as a Flask application**, follow these steps:
-
-### **1️⃣ Create & Activate a Virtual Environment**
-
-Run these commands in the project root:
-
-```sh
-python -m venv venv
-source venv/bin/activate  # macOS/Linux
-venv\Scripts\activate  # Windows
-```
-
-### **2️⃣ Install Dependencies**
-
-With the virtual environment activated, install dependencies:
-
-```sh
-pip install -r requirements.txt
-```
-
-### **3️⃣ Run the Flask Application**
-
-Start the app by running:
-
-```sh
-python app.py
-```
-
-The Flask app should now be running at:
-
-```
-http://127.0.0.1:5000
-```
-
----
-
-## **🔹 How the Docker Setup Works**
-
-### **1️⃣ `Dockerfile` (Container Configuration)**
-
-The `Dockerfile` defines how the Python application is containerized:
-
-- Uses **Python 3.10-slim** as the base image.
-- Sets up `/app` as the working directory.
-- Installs dependencies from `requirements.txt`.
-- Copies application files into the container.
-- Exposes port **5000**.
-- Runs `app.py` when the container starts.
-
-### **2️⃣ `docker-compose.yml` (Container Orchestration)**
-
-Located inside `./scripts/`, the `docker-compose.yml` defines the container:
-
-- **Container Name:** `account-manager`
-- **Build Context:** `../` (project root where `Dockerfile` is located)
-- **Port Mapping:** Exposes port `5000` on the host
-- **Restart Policy:** `always` (ensures the container restarts on failure)
-- **Startup Command:** Runs `python app.py` inside the container
-
 ---
 
 ## **🔹 Useful Docker Commands**
 
 | Command                       | Description                        |
-| ----------------------------- | ---------------------------------- |
+|-------------------------------|------------------------------------|
 | `docker ps`                   | Show running containers            |
 | `docker images`               | List all images                    |
 | `docker logs account-manager` | View logs of the running container |
@@ -141,44 +212,18 @@ Located inside `./scripts/`, the `docker-compose.yml` defines the container:
 
 ---
 
-## **🔹 Troubleshooting**
-
-### **Container Not Starting?**
-
-- Run:
-  ```sh
-  docker logs account-manager
-  ```
-- Check for missing dependencies or port conflicts.
-
-### **Port 5000 Already in Use?**
-
-- Find the process using port 5000:
-  ```sh
-  sudo lsof -i :5000
-  ```
-- Kill the process:
-  ```sh
-  sudo kill -9 <PID>
-  ```
-
-### **Docker Daemon Not Running?**
-
-- Start Docker:
-  ```sh
-  sudo systemctl start docker
-  ```
-
----
-
 ## **🎯 Summary**
 
-| Command                       | Purpose                            |
-| ----------------------------- | ---------------------------------- |
-| `./scripts/up.sh`             | Build and start the container      |
-| `./scripts/down.sh`           | Stop and remove the container      |
-| `python app.py`               | Start the Flask app without Docker |
-| `docker ps`                   | Check running containers           |
-| `docker logs account-manager` | View container logs                |
+| Command                                               | Purpose                              |
+|-------------------------------------------------------|--------------------------------------|
+| `./scripts/up.sh`                                     | Build and start the container        |
+| `./scripts/up.sh --dev`                               | Start in development mode            |
+| `./scripts/down.sh`                                   | Stop and remove the container        |
+| `./scripts/db-up.sh`                                  | Start PostgreSQL container           |
+| `./scripts/db-down.sh`                                | Stop and remove PostgreSQL           |
+| `uvicorn app:app --host 0.0.0.0 --port 5000 --reload` | Start the FastAPI app without Docker |
+| `docker ps`                                           | Check running containers             |
+| `docker logs account-manager`                         | View container logs                  |
 
-Now you can **run the application using Docker or directly as a Flask app**! 🚀
+Now you can **run the application using Docker, locally for development, or deploy it to AWS EC2**! 🚀
+

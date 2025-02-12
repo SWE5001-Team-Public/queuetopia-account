@@ -1,97 +1,43 @@
-from fastapi import FastAPI, HTTPException, Depends
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
-from typing import Dict
+import uvicorn
+from dotenv import load_dotenv
 
-app = FastAPI()
+from db.database import init_db
+from routes import account, auth
 
-# Enable CORS for all origins
+load_dotenv()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+  """Initialize the database at startup."""
+  await init_db()
+  yield
+
+
+app = FastAPI(lifespan=lifespan)
+
 app.add_middleware(
   CORSMiddleware,
-  allow_origins=["*"],  # Change this to restrict origins in production
+  allow_origins=["*"],
   allow_credentials=True,
   allow_methods=["*"],
   allow_headers=["*"],
 )
 
 
-# Health check endpoint for AWS ALB
-@app.get("/health")
-def health_check():
+# Health check endpoint
+@app.get("/health", tags=["System"])
+async def health_check():
+  """Health check endpoint for monitoring service status."""
   return {"status": "healthy"}
 
 
-# Pydantic model for user registration & login
-class User(BaseModel):
-  email: str
-  first_name: str
-  last_name: str
-  password: str
+# Other routes
+app.include_router(auth.router, tags=["Authentication"])
+app.include_router(account.router, prefix="/account", tags=["Account"])
 
-
-class LoginRequest(BaseModel):
-  email: str
-  password: str
-
-
-# Temporary in-memory user store for POC purposes
-users: Dict[str, User] = {}
-
-
-@app.post("/register")
-def register(user: User):
-  if user.email in users:
-    return JSONResponse(
-      status_code=400,
-      content={"message": "User already exists", "email": user.email}
-    )
-
-  users[user.email] = user
-  return JSONResponse(
-    status_code=201,
-    content={"message": "User registered successfully", "user": user.email}
-  )
-
-
-@app.post("/login")
-def login(login_data: LoginRequest):
-  user = users.get(login_data.email)
-
-  if user and user.password == login_data.password:
-    return JSONResponse(
-      status_code=200,
-      content={"message": "Login successful", "user": user.email}
-    )
-
-  return JSONResponse(
-    status_code=401,
-    content={"message": "Invalid credentials", "email": login_data.email}
-  )
-
-
-@app.get("/profile/{email}")
-def get_profile(email: str):
-  user = users.get(email)
-
-  if not user:
-    return JSONResponse(
-      status_code=404,
-      content={"message": "User not found", "email": email}
-    )
-
-  return JSONResponse(
-    status_code=200,
-    content={
-      "email": user.email,
-      "first_name": user.first_name,
-      "last_name": user.last_name
-    }
-  )
-
-
-# Run the app using Uvicorn
 if __name__ == "__main__":
-  import uvicorn
-
-  uvicorn.run(app, host="0.0.0.0", port=5000)
+  uvicorn.run("app:app", host="0.0.0.0", port=5000)
