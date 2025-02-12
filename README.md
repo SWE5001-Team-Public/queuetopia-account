@@ -4,6 +4,21 @@ This project can be run **using Docker** or **directly as a FastAPI application*
 
 ---
 
+## **Table of Contents**
+
+- [🔹 Prerequisites](#-prerequisites)
+- [🔹 Running the Application with Docker](#-running-the-application-with-docker)
+  - [Running in Development Mode (`--dev` Flag)](#-running-in-development-mode---dev-flag)
+  - [What `up.sh` Does](#-what-upsh-does)
+- [🔹 Running the FastAPI Application Locally for Development](#-running-the-fastapi-application-locally-for-development)
+- [🔹 Deploying the Docker Container to AWS EC2](#-deploying-the-docker-container-to-aws-ec2)
+- [🔹 Starting & Stopping the Database](#-starting--stopping-the-database)
+- [🔹 Stopping & Removing the Docker Container](#-stopping--removing-the-docker-container)
+- [🔹 Useful Docker Commands](#-useful-docker-commands)
+- [🎯 Summary](#-summary)
+
+---
+
 ## **🔹 Prerequisites**
 
 Make sure you have the following installed:
@@ -132,8 +147,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 ### **3️⃣ Clone the Repository**
 
 ```sh
-git clone https://github.com/SWE5001-Team-Public/queuetopia-account/queuetopia-account.git # HTTPS
-git clone git@github.com:SWE5001-Team-Public/queuetopia-account.git # SSH
+git clone https://github.com/your-repo/queuetopia-account.git
 cd queuetopia-account
 ```
 
@@ -169,11 +183,6 @@ Run:
 ./scripts/db-up.sh
 ```
 
-This script:
-
-1. Starts the PostgreSQL container defined in `docker-compose.yml`.
-2. Waits until PostgreSQL is ready before exiting.
-
 ### **Stopping PostgreSQL (`db-down.sh`)**
 
 Run:
@@ -181,12 +190,6 @@ Run:
 ```sh
 ./scripts/db-down.sh
 ```
-
-This script:
-
-1. Stops and removes the PostgreSQL container (`account-mgr-db`).
-2. Removes the associated Docker image.
-3. Cleans up unused Docker resources.
 
 ---
 
