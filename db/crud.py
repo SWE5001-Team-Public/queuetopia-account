@@ -20,3 +20,16 @@ async def create_user(db: AsyncSession, user: schemas.User):
   await db.commit()
   await db.refresh(db_user)
   return db_user
+
+
+async def create_company(db: AsyncSession, company: schemas.Company):
+  db_company = models.CompanyTable(
+    name=company.name,
+    uen=company.uen,
+    email=company.email,
+    user_id=company.user_id
+  )
+  db.add(db_company)
+  await db.commit()
+  await db.refresh(db_company)
+  return db_company
