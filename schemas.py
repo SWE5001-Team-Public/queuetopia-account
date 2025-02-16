@@ -1,6 +1,11 @@
 import uuid
 
 from pydantic import BaseModel
+from humps import camelize
+
+
+def to_camel(string: str) -> str:
+  return camelize(string)
 
 
 class User(BaseModel):
@@ -20,3 +25,8 @@ class Company(BaseModel):
   uen: str
   email: str
   user_id: str  # This is the user_id of the user who created the company
+
+  class Config:
+    alias_generator = to_camel
+    populate_by_name = True  # Allows using both snake_case and camelCase
+    from_attributes = True  # Needed for ORM models
