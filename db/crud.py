@@ -33,3 +33,9 @@ async def create_company(db: AsyncSession, company: schemas.Company):
   await db.commit()
   await db.refresh(db_company)
   return db_company
+
+
+async def get_companies_by_user_id(db: AsyncSession, user_id: str):
+  """Retrieve a list of companies associated with a given user_id."""
+  result = await db.execute(select(models.CompanyTable).filter(models.CompanyTable.user_id == user_id))
+  return result.scalars().all()

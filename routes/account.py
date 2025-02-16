@@ -16,5 +16,5 @@ async def get_profile(email: str, db: AsyncSession = Depends(get_db)):
 
   return JSONResponse(
     status_code=200,
-    content={"email": user.email, "first_name": user.first_name, "last_name": user.last_name}
+    content={"id": user.id, "email": user.email, "first_name": user.first_name, "last_name": user.last_name}
   )
