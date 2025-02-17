@@ -8,13 +8,13 @@ cd "$(dirname "$0")/.." || exit
 echo "Stopping existing containers before starting fresh..."
 bash scripts/down.sh
 
-# Default compose file
-COMPOSE_FILE="scripts/docker-compose.yml"
-
 # Check for --dev flag
 if [[ "$1" == "--dev" ]]; then
     COMPOSE_FILE="scripts/docker-compose-dev.yml"
     echo "Using development docker-compose file: $COMPOSE_FILE"
+else
+	COMPOSE_FILE="scripts/docker-compose.yml"
+    echo "Using production docker-compose file: $COMPOSE_FILE"
 fi
 
 echo "Building the Docker image..."

@@ -8,7 +8,7 @@ APP_IMAGE="queuetopia-account-manager"
 DB_IMAGE="queuetopia-account-mgr-db"
 
 echo "Stopping and removing the Docker containers..."
-docker-compose -f scripts/docker-compose.yml -p queuetopia down
+docker-compose -p queuetopia down
 
 # Stop and remove database container if running
 if docker ps -a --format '{{.Names}}' | grep -q "^$DB_CONTAINER$"; then
