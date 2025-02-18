@@ -5,7 +5,7 @@ import uvicorn
 from dotenv import load_dotenv
 
 from db.database import init_db
-from routes import account, auth, company
+from routes import account, auth, company, store
 
 load_dotenv()
 
@@ -39,6 +39,7 @@ async def health_check():
 app.include_router(auth.router, tags=["Authentication"])
 app.include_router(account.router, prefix="/account", tags=["Account"])
 app.include_router(company.router, prefix="/company", tags=["Company"])
+app.include_router(store.router, prefix="/store", tags=["Store"])
 
 if __name__ == "__main__":
   uvicorn.run("app:app", host="0.0.0.0", port=5000)
