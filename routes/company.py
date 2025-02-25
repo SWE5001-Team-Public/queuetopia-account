@@ -35,6 +35,6 @@ async def get_profile(c_id: int, db: AsyncSession = Depends(get_db)):
   """Retrieve a single company object by c_id"""
   company = await crud.get_company_by_c_id(db, c_id)
   if not company:
-    raise HTTPException(status_code=404, detail="User not found")
+    raise HTTPException(status_code=404, detail="Company not found")
 
   return company
