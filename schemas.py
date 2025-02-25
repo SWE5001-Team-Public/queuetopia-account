@@ -44,7 +44,7 @@ class CompanyResponse(BaseModel):
 
 class Store(BaseModel):
   name: str
-  alias: str
+  alias: str | None
   company_id: str  # This is the id of the company that owns the store
 
 
@@ -52,7 +52,7 @@ class StoreResponse(BaseModel):
   id: str
   s_id: int
   name: str
-  alias: str
+  alias: str | None
   company_id: str  # This is the id of the company that owns the store
   display_id: str
 
