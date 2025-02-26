@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import schemas
-from db import crud
+from repository import company as crud
 from db.database import get_db
 
 router = APIRouter()

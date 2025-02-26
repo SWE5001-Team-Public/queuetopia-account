@@ -1,5 +1,3 @@
-import uuid
-
 from pydantic import BaseModel
 from humps import camelize
 
@@ -42,10 +40,21 @@ class CompanyResponse(BaseModel):
     from_attributes = True  # Needed for ORM models
 
 
-class Store(BaseModel):
+class CreateStore(BaseModel):
   name: str
   alias: str | None
   company_id: str  # This is the id of the company that owns the store
+
+
+class EditStore(BaseModel):
+  id: str
+  name: str
+  alias: str | None
+
+
+class EditStoreStatus(BaseModel):
+  id: str
+  deactivated: bool
 
 
 class StoreResponse(BaseModel):
