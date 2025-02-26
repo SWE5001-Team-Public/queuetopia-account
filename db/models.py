@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, ForeignKey, Integer, Sequence
+from sqlalchemy import Column, String, ForeignKey, Integer, Sequence, Boolean
 import uuid
 
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -15,6 +15,7 @@ class UserTable(Base):
   first_name = Column(String, nullable=False)
   last_name = Column(String, nullable=False)
   password = Column(String, nullable=False)
+  deactivated = Column(Boolean, default=False)
 
   @hybrid_property
   def display_id(self):
@@ -29,6 +30,7 @@ class CompanyTable(Base):
   name = Column(String, nullable=False)
   uen = Column(String, nullable=False)
   email = Column(String, nullable=False)
+  deactivated = Column(Boolean, default=False)
   user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
   @hybrid_property
@@ -43,6 +45,7 @@ class StoreTable(Base):
   s_id = Column(Integer, Sequence('store_s_id_seq'), index=True, autoincrement=True, nullable=False)
   name = Column(String, nullable=False)
   alias = Column(String, nullable=True)
+  deactivated = Column(Boolean, default=False)
   company_id = Column(String, ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
 
   @hybrid_property
