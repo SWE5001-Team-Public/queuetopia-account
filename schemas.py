@@ -18,11 +18,23 @@ class LoginRequest(BaseModel):
   password: str
 
 
-class Company(BaseModel):
+class CreateCompany(BaseModel):
   name: str
   uen: str
   email: str
   user_id: str  # This is the id of the user who created the company
+
+
+class EditCompany(BaseModel):
+  id: str
+  name: str
+  uen: str
+  email: str
+
+
+class EditCompanyStatus(BaseModel):
+  id: str
+  deactivated: bool
 
 
 class CompanyResponse(BaseModel):
