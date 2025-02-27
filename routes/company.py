@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.post("/create")
-async def create(company: schemas.Company, db: AsyncSession = Depends(get_db)):
+async def create(company: schemas.CreateCompany, db: AsyncSession = Depends(get_db)):
   """Create a new company object"""
   new_company = await crud.create_company(db, company)
   return JSONResponse(
@@ -38,3 +38,31 @@ async def get_profile(c_id: int, db: AsyncSession = Depends(get_db)):
     raise HTTPException(status_code=404, detail="Company not found")
 
   return company
+
+
+@router.post("/edit")
+async def edit_company(company: schemas.EditCompany, db: AsyncSession = Depends(get_db)):
+  """Edit the name, uen, and email of a company by its ID"""
+  updated_company = await crud.edit_company(db, company)
+
+  if updated_company is None:
+    raise HTTPException(status_code=404, detail="Company not found")
+
+  return JSONResponse(
+    status_code=200,
+    content={"message": "Company updated successfully", "id": updated_company.id, "userId": updated_company.user_id}
+  )
+
+
+@router.post("/deactivate/{id}")
+async def deactivate_company(id: str, db: AsyncSession = Depends(get_db)):
+  """Set the status of a company by its ID"""
+  updated_company = await crud.edit_company_status(db, schemas.EditCompanyStatus(id=id, deactivated=True))
+
+  if updated_company is None:
+    raise HTTPException(status_code=404, detail="Company not found")
+
+  return JSONResponse(
+    status_code=200,
+    content={"message": "Company deactivated successfully", "id": updated_company.id, "userId": updated_company.user_id}
+  )
