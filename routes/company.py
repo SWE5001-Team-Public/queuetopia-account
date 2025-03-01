@@ -12,11 +12,16 @@ router = APIRouter()
 @router.post("/create")
 async def create(company: schemas.CreateCompany, db: AsyncSession = Depends(get_db)):
   """Create a new company object"""
-  new_company = await crud.create_company(db, company)
-  return JSONResponse(
-    status_code=201,
-    content={"message": "Company created successfully", "id": new_company.id, "company": new_company.name}
-  )
+  try:
+    new_company = await crud.create_company(db, company)
+    if not new_company:
+      raise HTTPException(status_code=400, detail="Failed to create company")
+    return JSONResponse(
+      status_code=201,
+      content={"message": "Company created successfully", "id": new_company.id, "company": new_company.name}
+    )
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 
 @router.get("/get/{user_id}", response_model=list[schemas.CompanyResponse])
