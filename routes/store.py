@@ -1,8 +1,11 @@
+import json
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import schemas
+from aws.sqs import send_message
 from repository import store as crud
 from db.database import get_db
 
@@ -12,12 +15,27 @@ router = APIRouter()
 @router.post("/create")
 async def create(store: schemas.CreateStore, db: AsyncSession = Depends(get_db)):
   """Create a new store object"""
-  new_store = await crud.create_store(db, store)
+  try:
+    new_store = await crud.create_store(db, store)
 
-  return JSONResponse(
-    status_code=201,
-    content={"message": "Store created successfully", "id": new_store.id, "store": new_store.name}
-  )
+    if not new_store:
+      raise HTTPException(status_code=400, detail="Failed to create store")
+
+    store_data = {
+      "id": new_store.id,
+      "s_id": new_store.s_id,
+      "name": new_store.name,
+      "alias": new_store.alias,
+      "company_id": new_store.company_id,
+    }
+    await send_message(json.dumps(store_data), "store-create-event")
+
+    return JSONResponse(
+      status_code=201,
+      content={"message": "Store created successfully", "id": new_store.id, "store": new_store.name}
+    )
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 
 @router.get("/get/{c_id}", response_model=list[schemas.StoreResponse])
@@ -39,6 +57,13 @@ async def edit_store(store: schemas.EditStore, db: AsyncSession = Depends(get_db
   if updated_store is None:
     raise HTTPException(status_code=404, detail="Store not found")
 
+  store_data = {
+    "id": updated_store.id,
+    "name": updated_store.name,
+    "alias": updated_store.alias,
+  }
+  await send_message(json.dumps(store_data), "store-update-event")
+
   return JSONResponse(
     status_code=200,
     content={"message": "Store updated successfully", "id": updated_store.id, "companyId": updated_store.company_id}
@@ -52,6 +77,12 @@ async def deactivate_store(id: str, db: AsyncSession = Depends(get_db)):
 
   if updated_store is None:
     raise HTTPException(status_code=404, detail="Store not found")
+
+  store_data = {
+    "id": updated_store.id,
+    "deactivated": updated_store.deactivated
+  }
+  await send_message(json.dumps(store_data), "store-deactivate-event")
 
   return JSONResponse(
     status_code=200,
