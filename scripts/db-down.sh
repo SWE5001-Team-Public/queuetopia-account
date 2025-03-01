@@ -8,7 +8,7 @@ DB_IMAGE="queuetopia-account-mgr-db"
 COMPOSE_FILE="scripts/docker-compose-db.yml"
 
 echo "Stopping and removing the PostgreSQL container..."
-docker-compose -f "$COMPOSE_FILE" down  --volumes postgres
+docker-compose -f "$COMPOSE_FILE" down -v
 
 # Remove the database container if it still exists
 if docker ps -a --format '{{.Names}}' | grep -q "^$DB_CONTAINER$"; then
@@ -28,6 +28,7 @@ else
 fi
 
 echo "Cleaning up unused Docker resources..."
-docker system prune -af
+docker image prune -af --filter "label=project=queuetopia-account-mgr"
+docker volume rm queuetopia_account_postgres_data
 
 echo "✅ PostgreSQL container and image removed!"

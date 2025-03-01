@@ -5,7 +5,7 @@ set -e
 COMPOSE_FILE="scripts/docker-compose-db.yml"
 
 echo "Starting the PostgreSQL container..."
-docker-compose -f "$COMPOSE_FILE" -p queuetopia up -d postgres
+docker-compose -f "$COMPOSE_FILE" -p queuetopia_account up -d account-mgr-postgres
 
 # Wait for PostgreSQL to be ready
 echo "Waiting for PostgreSQL to start..."

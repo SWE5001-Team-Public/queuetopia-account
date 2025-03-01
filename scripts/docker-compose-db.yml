@@ -1,5 +1,5 @@
 services:
-  postgres:
+  account-mgr-postgres:
     container_name: account-mgr-db
     image: postgres:15
     restart: always

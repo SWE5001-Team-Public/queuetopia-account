@@ -21,7 +21,7 @@ echo "Building the Docker image..."
 docker build -t account-manager .
 
 echo "Starting the Docker container with $COMPOSE_FILE..."
-docker-compose -f "$COMPOSE_FILE" -p queuetopia up -d --build
+docker-compose -f "$COMPOSE_FILE" -p queuetopia_account up -d --build
 
 echo "Checking running containers..."
 docker ps
