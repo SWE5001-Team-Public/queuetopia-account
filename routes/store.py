@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 import schemas
 from aws.sqs import send_message
-from repository import store as crud
 from db.database import get_db
+from repository import store as crud
 
 router = APIRouter()
 
@@ -47,6 +47,17 @@ async def get_stores(c_id: int, db: AsyncSession = Depends(get_db)):
     raise HTTPException(status_code=404, detail="No stores found for this company")
 
   return stores
+
+
+@router.get("/details/{s_id}", response_model=schemas.StoreResponse)
+async def get_store_by_id(s_id: int, db: AsyncSession = Depends(get_db)):
+  """Retrieve store details by s_id"""
+  store = await crud.get_store_by_id(db, s_id)
+
+  if not store:
+    raise HTTPException(status_code=404, detail="Store not found")
+
+  return store
 
 
 @router.post("/edit")
