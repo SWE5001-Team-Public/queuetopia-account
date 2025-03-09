@@ -13,17 +13,6 @@ else
     docker compose -f "$COMPOSE_FILE" down -v
 fi
 
-# Detect system architecture
-ARCH=$(uname -m)
-if [[ "$ARCH" == "arm64" ]]; then
-    PLATFORM="linux/arm64"
-else
-    PLATFORM="linux/amd64"
-fi
-
-echo "Detected architecture: $ARCH"
-echo "Ensuring removal of PostgreSQL container and image for platform: $PLATFORM"
-
 # Stop and remove the database container if it exists
 FOUND_CONTAINER=$(docker ps -a --format '{{.Names}}' | grep "^$DB_CONTAINER$" || true)
 
@@ -54,4 +43,4 @@ else
     echo "⚠️ Volume $VOLUME_NAME not found or already removed."
 fi
 
-echo "✅ PostgreSQL container, image, and volume removed for platform: $PLATFORM!"
+echo "✅ PostgreSQL container, image, and volume removed!"

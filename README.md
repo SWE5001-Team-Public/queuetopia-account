@@ -57,7 +57,7 @@ If you want to run the app using the **development Docker Compose file**, use:
 
 1. Moves to the **project root directory** where the `Dockerfile` is located.
 2. Calls `down.sh` to stop any existing containers.
-3. Builds a Docker image named `account-manager`.
+3. Builds a Docker image named `account-mgr`.
 4. Starts the container using `docker-compose.yml` (or `docker-compose-dev.yml` when `--dev` is passed).
 5. Runs the container **in detached mode (`-d`)**.
 6. Lists all running containers.
@@ -205,20 +205,20 @@ To stop and clean up the container and its image, run:
 
 ## **🔹 Useful Docker Commands**
 
-| Command                       | Description                        |
-|-------------------------------|------------------------------------|
-| `docker ps`                   | Show running containers            |
-| `docker images`               | List all images                    |
-| `docker logs account-manager` | View logs of the running container |
-| `docker-compose up -d`        | Start containers in detached mode  |
-| `docker-compose down`         | Stop and remove containers         |
+| Command                   | Description                        |
+| ------------------------- | ---------------------------------- |
+| `docker ps`               | Show running containers            |
+| `docker images`           | List all images                    |
+| `docker logs account-mgr` | View logs of the running container |
+| `docker-compose up -d`    | Start containers in detached mode  |
+| `docker-compose down`     | Stop and remove containers         |
 
 ---
 
 ## **🎯 Summary**
 
 | Command                                               | Purpose                              |
-|-------------------------------------------------------|--------------------------------------|
+| ----------------------------------------------------- | ------------------------------------ |
 | `./scripts/up.sh`                                     | Build and start the container        |
 | `./scripts/up.sh --dev`                               | Start in development mode            |
 | `./scripts/down.sh`                                   | Stop and remove the container        |
@@ -226,7 +226,6 @@ To stop and clean up the container and its image, run:
 | `./scripts/db-down.sh`                                | Stop and remove PostgreSQL           |
 | `uvicorn app:app --host 0.0.0.0 --port 5000 --reload` | Start the FastAPI app without Docker |
 | `docker ps`                                           | Check running containers             |
-| `docker logs account-manager`                         | View container logs                  |
+| `docker logs account-mgr`                             | View container logs                  |
 
 Now you can **run the application using Docker, locally for development, or deploy it to AWS EC2**! 🚀
-

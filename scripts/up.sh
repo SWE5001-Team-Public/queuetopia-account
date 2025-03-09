@@ -38,7 +38,7 @@ echo "Detected architecture: $ARCH"
 echo "Building the Docker image for platform: $PLATFORM"
 
 # Build the Docker image for the detected platform
-docker buildx build --platform $PLATFORM -t account-manager . --load
+docker buildx build --platform $PLATFORM -t account-mgr . --load
 
 echo "Starting the Docker container with $COMPOSE_FILE..."
 if command -v docker-compose &> /dev/null; then

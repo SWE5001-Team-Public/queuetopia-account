@@ -11,17 +11,6 @@ else
     docker compose -f "$COMPOSE_FILE" -p queuetopia_account up -d account-mgr-postgres
 fi
 
-# Detect system architecture
-ARCH=$(uname -m)
-if [[ "$ARCH" == "arm64" ]]; then
-    PLATFORM="linux/arm64"
-else
-    PLATFORM="linux/amd64"
-fi
-
-echo "Detected architecture: $ARCH"
-echo "Waiting for PostgreSQL to start on platform: $PLATFORM..."
-
 # Identify the correct PostgreSQL container name
 DB_CONTAINER=$(docker ps --format '{{.Names}}' | grep 'account-mgr' || true)
 

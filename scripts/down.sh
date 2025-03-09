@@ -3,7 +3,7 @@ set -e
 
 # Define container and image names
 DB_CONTAINER="account-mgr-db"
-APP_IMAGE="queuetopia_account-account-manager"
+APP_IMAGE="queuetopia_account-account-mgr"
 DB_IMAGE="queuetopia_account-account-mgr-db"
 
 echo "Stopping and removing the Docker containers..."

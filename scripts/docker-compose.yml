@@ -1,12 +1,22 @@
 services:
-  account-manager:
-    container_name: account-manager
+  account-mgr:
+    container_name: account-mgr
     build:
       context: ../
       dockerfile: Dockerfile
     ports:
-      - '5000:5000'
+      - "5000:5000"
     restart: always
     env_file:
       - ../.env.production
-    command: [ 'uvicorn', 'app:app', '--host', '0.0.0.0', '--port', '5000', '--workers', '4' ]
+    command:
+      [
+        "uvicorn",
+        "app:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "5000",
+        "--workers",
+        "4",
+      ]

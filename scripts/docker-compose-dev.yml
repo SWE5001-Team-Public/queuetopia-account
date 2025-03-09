@@ -1,6 +1,6 @@
 services:
-  account-manager:
-    container_name: account-manager
+  account-mgr:
+    container_name: account-mgr
     build:
       context: ../
       dockerfile: Dockerfile
@@ -12,7 +12,7 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:password@account-mgr-postgres:5432/account_mgr_db
       ENVIRONMENT: local
-    command: [ 'uvicorn', 'app:app', '--host', '0.0.0.0', '--port', '5000' ]
+    command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "5000"]
 
   account-mgr-postgres:
     container_name: account-mgr-db
