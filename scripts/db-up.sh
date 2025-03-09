@@ -5,13 +5,36 @@ set -e
 COMPOSE_FILE="scripts/docker-compose-db.yml"
 
 echo "Starting the PostgreSQL container..."
-docker-compose -f "$COMPOSE_FILE" -p queuetopia_account up -d account-mgr-postgres
+if command -v docker-compose &> /dev/null; then
+    docker-compose -f "$COMPOSE_FILE" -p queuetopia_account up -d account-mgr-postgres
+else
+    docker compose -f "$COMPOSE_FILE" -p queuetopia_account up -d account-mgr-postgres
+fi
+
+# Detect system architecture
+ARCH=$(uname -m)
+if [[ "$ARCH" == "arm64" ]]; then
+    PLATFORM="linux/arm64"
+else
+    PLATFORM="linux/amd64"
+fi
+
+echo "Detected architecture: $ARCH"
+echo "Waiting for PostgreSQL to start on platform: $PLATFORM..."
+
+# Identify the correct PostgreSQL container name
+DB_CONTAINER=$(docker ps --format '{{.Names}}' | grep 'account-mgr' || true)
+
+if [[ -z "$DB_CONTAINER" ]]; then
+    echo "❌ Error: PostgreSQL container not found!"
+    exit 1
+fi
 
 # Wait for PostgreSQL to be ready
-echo "Waiting for PostgreSQL to start..."
-until docker exec account-mgr-db pg_isready -U postgres > /dev/null 2>&1; do
+echo "Waiting for PostgreSQL ($DB_CONTAINER) to start..."
+until docker exec "$DB_CONTAINER" pg_isready -U postgres > /dev/null 2>&1; do
     sleep 2
-    echo "PostgreSQL is still starting..."
+    echo "PostgreSQL ($DB_CONTAINER) is still starting..."
 done
 
-echo "✅ PostgreSQL is up and running!"
+echo "✅ PostgreSQL ($DB_CONTAINER) is up and running!"
