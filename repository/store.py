@@ -34,6 +34,12 @@ async def get_store_by_id(db: AsyncSession, s_id: int):
   return result.scalar_one_or_none()
 
 
+async def get_store_by_uuid(db: AsyncSession, id: str):
+  """Retrieve store details with a given uuid."""
+  result = await db.execute(select(StoreTable).filter(StoreTable.id == id, StoreTable.deactivated == False))
+  return result.scalar_one_or_none()
+
+
 async def edit_store(db: AsyncSession, store: EditStore):
   """Edit the name and alias of a store by its ID."""
   result = await db.execute(select(StoreTable).filter(StoreTable.id == store.id))

@@ -60,6 +60,17 @@ async def get_store_by_id(s_id: int, db: AsyncSession = Depends(get_db)):
   return store
 
 
+@router.get("/id/{id}", response_model=schemas.StoreResponse)
+async def get_store_by_id(id: str, db: AsyncSession = Depends(get_db)):
+  """Retrieve store details by id"""
+  store = await crud.get_store_by_uuid(db, id)
+
+  if not store:
+    raise HTTPException(status_code=404, detail="Store not found")
+
+  return store
+
+
 @router.post("/edit")
 async def edit_store(store: schemas.EditStore, db: AsyncSession = Depends(get_db)):
   """Edit the name and alias of a store by its ID"""
