@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import schemas
 from aws.sqs import send_message
 from db.database import get_db
+from encryption import verify_password
 from repository import account as crud
 
 router = APIRouter()
@@ -42,9 +43,27 @@ async def register(user: schemas.User, db: AsyncSession = Depends(get_db)):
 @router.post("/login")
 async def login(login_data: schemas.LoginRequest, db: AsyncSession = Depends(get_db)):
   user = await crud.get_user_by_email(db, login_data.email)
-  if user and user.password == login_data.password:
+
+  if user and verify_password(login_data.password, user.password):
+    if user.email_confirmed is False:
+      raise HTTPException(status_code=403, detail="Email not confirmed")
+
     return JSONResponse(
       status_code=200,
       content={"message": "Login successful", "user": user.email}
     )
+
   raise HTTPException(status_code=401, detail="Invalid credentials")
+
+
+@router.post("/confirm-email")
+async def confirm_email(body: schemas.ConfirmEmailRequest, db: AsyncSession = Depends(get_db)):
+  user = await crud.confirm_email(db, body.email)
+
+  if not user:
+    raise HTTPException(status_code=404, detail="Invalid request")
+
+  return JSONResponse(
+    status_code=200,
+    content={"message": "Email confirmed successfully", "user": user.email}
+  )
