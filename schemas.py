@@ -1,5 +1,5 @@
-from pydantic import BaseModel
 from humps import camelize
+from pydantic import BaseModel
 
 
 def to_camel(string: str) -> str:
@@ -16,6 +16,10 @@ class User(BaseModel):
 class LoginRequest(BaseModel):
   email: str
   password: str
+
+
+class ConfirmEmailRequest(BaseModel):
+  email: str
 
 
 class CreateCompany(BaseModel):

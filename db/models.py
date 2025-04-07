@@ -1,6 +1,7 @@
-from sqlalchemy import Column, String, ForeignKey, Integer, Sequence, Boolean
+import datetime
 import uuid
 
+from sqlalchemy import Column, String, ForeignKey, Integer, Sequence, Boolean, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from db.database import Base
@@ -15,7 +16,11 @@ class UserTable(Base):
   first_name = Column(String, nullable=False)
   last_name = Column(String, nullable=False)
   password = Column(String, nullable=False)
+  email_confirmed = Column(Boolean, default=False)
   deactivated = Column(Boolean, default=False)
+  created_at = Column(DateTime, default=datetime.datetime.now(), nullable=False)
+  updated_at = Column(DateTime, default=datetime.datetime.now(), nullable=False)
+  confirmed_at = Column(DateTime, default=None, nullable=True)
 
   @hybrid_property
   def display_id(self):

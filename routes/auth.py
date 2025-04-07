@@ -1,10 +1,14 @@
+import json
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import schemas
-from repository import account as crud
+from aws.sqs import send_message
 from db.database import get_db
+from encryption import verify_password
+from repository import account as crud
 
 router = APIRouter()
 
@@ -15,19 +19,51 @@ async def register(user: schemas.User, db: AsyncSession = Depends(get_db)):
   if existing_user:
     raise HTTPException(status_code=400, detail="User already exists")
 
-  new_user = await crud.create_user(db, user)
-  return JSONResponse(
-    status_code=201,
-    content={"message": "User registered successfully", "user": new_user.email}
-  )
+  try:
+    new_user = await crud.create_user(db, user)
+
+    if not new_user:
+      raise HTTPException(status_code=400, detail="Failed to create user")
+
+    user_data = {
+      "first_name": user.first_name,
+      "last_name": user.last_name,
+      "email": user.email,
+    }
+    await send_message(json.dumps(user_data), "register-user-event", "register")
+
+    return JSONResponse(
+      status_code=201,
+      content={"message": "User registered successfully", "user": new_user.email}
+    )
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 
 @router.post("/login")
 async def login(login_data: schemas.LoginRequest, db: AsyncSession = Depends(get_db)):
   user = await crud.get_user_by_email(db, login_data.email)
-  if user and user.password == login_data.password:
+
+  if user and verify_password(login_data.password, user.password):
+    if user.email_confirmed is False:
+      raise HTTPException(status_code=403, detail="Email not confirmed")
+
     return JSONResponse(
       status_code=200,
       content={"message": "Login successful", "user": user.email}
     )
+
   raise HTTPException(status_code=401, detail="Invalid credentials")
+
+
+@router.post("/confirm-email")
+async def confirm_email(body: schemas.ConfirmEmailRequest, db: AsyncSession = Depends(get_db)):
+  user = await crud.confirm_email(db, body.email)
+
+  if not user:
+    raise HTTPException(status_code=404, detail="Invalid request")
+
+  return JSONResponse(
+    status_code=200,
+    content={"message": "Email confirmed successfully", "user": user.email}
+  )
