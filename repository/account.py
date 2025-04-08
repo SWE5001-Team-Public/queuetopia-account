@@ -34,7 +34,7 @@ async def confirm_email(db: AsyncSession, email: str):
   """Confirm a user's email."""
   user = await get_user_by_email(db, email)
 
-  if not user or user.confirmed_at:
+  if not user or user.email_confirmed:
     return None
 
   user.email_confirmed = True
