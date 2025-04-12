@@ -27,5 +27,17 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  account-mgr-vk:
+    container_name: account-mgr-vk
+    image: valkey/valkey:latest
+    restart: always
+    command: ["valkey-server", "/usr/local/etc/valkey/valkey.conf"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - valkey_data:/data
+      - ./valkey.conf:/usr/local/etc/valkey/valkey.conf
+
 volumes:
   postgres_data:
+  valkey_data:
