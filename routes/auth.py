@@ -1,14 +1,18 @@
 import json
+from typing import Dict, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
+from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import schemas
 from aws.sqs import send_message
 from db.database import get_db
+from db.valkey_client import get_valkey
 from encryption import verify_password
 from repository import account as crud
+from session_manager import get_current_user, invalidate_session, create_session
 
 router = APIRouter()
 
@@ -41,19 +45,68 @@ async def register(user: schemas.User, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/login")
-async def login(login_data: schemas.LoginRequest, db: AsyncSession = Depends(get_db)):
+async def login(
+  login_data: schemas.LoginRequest,
+  db: AsyncSession = Depends(get_db),
+  valkey: Redis = Depends(get_valkey)
+):
   user = await crud.get_user_by_email(db, login_data.email)
 
   if user and verify_password(login_data.password, user.password):
     if user.email_confirmed is False:
       raise HTTPException(status_code=403, detail="Email not confirmed")
 
+    # Create a session for the authenticated user
+    user_data = {
+      "first_name": user.first_name,
+      "last_name": user.last_name,
+      "email_confirmed": user.email_confirmed
+    }
+
+    # Create session and get token
+    session_token = await create_session(valkey, user.email, str(user.id), user_data)
+
     return JSONResponse(
       status_code=200,
-      content={"message": "Login successful", "user": user.email}
+      content={
+        "message": "Login successful",
+        "user": user.email,
+        "session_token": session_token
+      },
+      headers={"X-Session-Token": session_token}  # Also include in header for easy client usage
     )
 
   raise HTTPException(status_code=401, detail="Invalid credentials")
+
+
+@router.post("/logout")
+async def logout(
+  user_data: Dict[str, Any] = Depends(get_current_user),
+  valkey: Redis = Depends(get_valkey)
+):
+  """Logout endpoint - invalidates the current session"""
+  email = user_data.get("email")
+  success = await invalidate_session(valkey, email)
+
+  if not success:
+    raise HTTPException(status_code=400, detail="Logout failed")
+
+  return JSONResponse(
+    content={"message": "Logged out successfully"},
+    status_code=200
+  )
+
+
+@router.get("/session-check")
+async def check_session(user_data: Dict[str, Any] = Depends(get_current_user)):
+  """Simple endpoint to verify if a session is valid"""
+  return JSONResponse(
+    content={
+      "message": "Session is valid",
+      "email": user_data.get("email")
+    },
+    status_code=200
+  )
 
 
 @router.post("/confirm-email")
