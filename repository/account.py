@@ -5,16 +5,17 @@ from sqlalchemy.future import select
 
 from db.models import UserTable
 from encryption import get_password_hash
-from schemas import User
+from schemas import User, LoginRequest
 
 
-async def create_user(db: AsyncSession, user: User, role: str):
+async def create_user(db: AsyncSession, user: User, role: str, c_id: int = None):
   """Create a new user."""
   db_user = UserTable(
     email=user.email,
     first_name=user.first_name,
     last_name=user.last_name,
     role=role,
+    company_id=c_id,
     password=get_password_hash(user.password),
     created_at=datetime.datetime.now(),
     updated_at=datetime.datetime.now(),
@@ -41,6 +42,21 @@ async def confirm_email(db: AsyncSession, email: str):
   user.email_confirmed = True
   user.updated_at = datetime.datetime.now()
   user.confirmed_at = datetime.datetime.now()
+
+  await db.commit()
+  await db.refresh(user)
+  return user
+
+
+async def change_password(db: AsyncSession, req: LoginRequest):
+  """Change a user's password."""
+  user = await get_user_by_email(db, req.email)
+
+  if not user or user.email_confirmed:
+    return None
+
+  user.password = get_password_hash(req.password)
+  user.updated_at = datetime.datetime.now()
 
   await db.commit()
   await db.refresh(user)

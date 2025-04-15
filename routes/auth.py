@@ -34,12 +34,45 @@ async def register(user: schemas.User, db: AsyncSession = Depends(get_db)):
       "first_name": user.first_name,
       "last_name": user.last_name,
       "email": user.email,
+      "role": Role.BUSINESS_OWNER,
     }
     await send_message(json.dumps(user_data), "register-user-event", "register")
 
     return JSONResponse(
       status_code=201,
       content={"message": "User registered successfully", "user": new_user.email}
+    )
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+
+
+@router.post("/register/staff")
+async def register_staff(staff: schemas.Staff, db: AsyncSession = Depends(get_db)):
+  existing_user = await crud.get_user_by_email(db, staff.email)
+  if existing_user:
+    raise HTTPException(status_code=400, detail="User already exists")
+
+  try:
+    password = "temp-123"
+    new_user = schemas.User(email=staff.email, first_name=staff.first_name, last_name=staff.last_name,
+                            password=password)
+    new_staff = await crud.create_user(db, new_user, Role.EMPLOYEE, c_id=staff.c_id)
+
+    if not new_staff:
+      raise HTTPException(status_code=400, detail="Failed to create user")
+
+    user_data = {
+      "first_name": staff.first_name,
+      "last_name": staff.last_name,
+      "email": staff.email,
+      "password": password,
+      "role": Role.EMPLOYEE,
+    }
+    await send_message(json.dumps(user_data), "register-user-event", "register")
+
+    return JSONResponse(
+      status_code=201,
+      content={"message": "User created successfully", "user": new_staff.email}
     )
   except Exception as e:
     raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
@@ -120,4 +153,17 @@ async def confirm_email(body: schemas.ConfirmEmailRequest, db: AsyncSession = De
   return JSONResponse(
     status_code=200,
     content={"message": "Email confirmed successfully", "user": user.email}
+  )
+
+
+@router.post("/change-password")
+async def change_password(body: schemas.LoginRequest, db: AsyncSession = Depends(get_db)):
+  user = await crud.change_password(db, body)
+
+  if not user:
+    raise HTTPException(status_code=404, detail="Invalid request")
+
+  return JSONResponse(
+    status_code=200,
+    content={"message": "Password updated successfully", "user": user.email}
   )

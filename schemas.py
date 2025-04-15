@@ -13,6 +13,13 @@ class User(BaseModel):
   password: str
 
 
+class Staff(BaseModel):
+  email: str
+  first_name: str
+  last_name: str
+  c_id: int
+
+
 class LoginRequest(BaseModel):
   email: str
   password: str

@@ -26,6 +26,7 @@ class UserTable(Base):
   password = Column(String, nullable=False)
   email_confirmed = Column(Boolean, default=False)
   role = Column(String, ForeignKey("roles.key", ondelete="CASCADE"), nullable=False)
+  company_id = Column(Integer, ForeignKey("companies.c_id", ondelete="CASCADE"), nullable=True)
   deactivated = Column(Boolean, default=False)
   created_at = Column(DateTime, default=datetime.datetime.now(), nullable=False)
   updated_at = Column(DateTime, default=datetime.datetime.now(), nullable=False)
@@ -40,7 +41,7 @@ class CompanyTable(Base):
   __tablename__ = "companies"
 
   id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
-  c_id = Column(Integer, Sequence('company_c_id_seq'), index=True, autoincrement=True, nullable=False)
+  c_id = Column(Integer, Sequence('company_c_id_seq'), index=True, unique=True, autoincrement=True, nullable=False)
   name = Column(String, nullable=False)
   uen = Column(String, nullable=False)
   email = Column(String, nullable=False)
@@ -56,7 +57,7 @@ class StoreTable(Base):
   __tablename__ = "stores"
 
   id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
-  s_id = Column(Integer, Sequence('store_s_id_seq'), index=True, autoincrement=True, nullable=False)
+  s_id = Column(Integer, Sequence('store_s_id_seq'), index=True, unique=True, autoincrement=True, nullable=False)
   name = Column(String, nullable=False)
   alias = Column(String, nullable=True)
   deactivated = Column(Boolean, default=False)
