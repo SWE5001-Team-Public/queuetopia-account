@@ -32,6 +32,12 @@ async def get_user_by_email(db: AsyncSession, email: str):
   return result.scalar_one_or_none()
 
 
+async def get_accounts_by_c_id(db: AsyncSession, c_id: int):
+  """Retrieve a list of accounts associated with a given c_id."""
+  result = await db.execute(select(UserTable).filter(UserTable.company_id == c_id))
+  return result.scalars().all()
+
+
 async def confirm_email(db: AsyncSession, email: str):
   """Confirm a user's email."""
   user = await get_user_by_email(db, email)

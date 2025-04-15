@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
+import schemas
 from db.database import get_db
 from repository import account as crud
 
@@ -18,3 +19,14 @@ async def get_profile(email: str, db: AsyncSession = Depends(get_db)):
     status_code=200,
     content={"id": user.id, "email": user.email, "first_name": user.first_name, "last_name": user.last_name}
   )
+
+
+@router.get("/get/{c_id}", response_model=list[schemas.StaffResponse])
+async def get_stores(c_id: int, db: AsyncSession = Depends(get_db)):
+  """Retrieve a list of account objects for a specific c_id"""
+  stores = await crud.get_accounts_by_c_id(db, c_id)
+
+  if not stores:
+    raise HTTPException(status_code=404, detail="No accounts found for this company")
+
+  return stores
