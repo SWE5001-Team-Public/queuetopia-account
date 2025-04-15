@@ -48,6 +48,11 @@ class LoginRequest(BaseModel):
   password: str
 
 
+class ChangeStatusRequest(BaseModel):
+  email: str
+  deactivated: bool
+
+
 class ConfirmEmailRequest(BaseModel):
   email: str
 

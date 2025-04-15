@@ -5,7 +5,7 @@ from sqlalchemy.future import select
 
 from db.models import UserTable
 from encryption import get_password_hash
-from schemas import User, LoginRequest
+from schemas import User, LoginRequest, ChangeStatusRequest
 
 
 async def create_user(db: AsyncSession, user: User, role: str, c_id: int = None):
@@ -29,6 +29,12 @@ async def create_user(db: AsyncSession, user: User, role: str, c_id: int = None)
 async def get_user_by_email(db: AsyncSession, email: str):
   """Retrieve a user by email."""
   result = await db.execute(select(UserTable).filter(UserTable.email == email, UserTable.deactivated == False))
+  return result.scalar_one_or_none()
+
+
+async def get_user_by_email_ignore_status(db: AsyncSession, email: str):
+  """Retrieve a user by email."""
+  result = await db.execute(select(UserTable).filter(UserTable.email == email))
   return result.scalar_one_or_none()
 
 
@@ -62,6 +68,18 @@ async def change_password(db: AsyncSession, req: LoginRequest):
     return None
 
   user.password = get_password_hash(req.password)
+  user.updated_at = datetime.datetime.now()
+
+  await db.commit()
+  await db.refresh(user)
+  return user
+
+
+async def change_status(db: AsyncSession, req: ChangeStatusRequest):
+  """Change a user's status."""
+  user = await get_user_by_email_ignore_status(db, req.email)
+
+  user.deactivated = req.deactivated
   user.updated_at = datetime.datetime.now()
 
   await db.commit()

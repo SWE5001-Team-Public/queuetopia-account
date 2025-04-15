@@ -30,3 +30,17 @@ async def get_stores(c_id: int, db: AsyncSession = Depends(get_db)):
     raise HTTPException(status_code=404, detail="No accounts found for this company")
 
   return stores
+
+
+@router.post("/edit/status")
+async def edit_staff_status(staff: schemas.ChangeStatusRequest, db: AsyncSession = Depends(get_db)):
+  updated_staff = await crud.change_status(db, staff)
+
+  if updated_staff is None:
+    raise HTTPException(status_code=404, detail="Staff details not found")
+
+  return JSONResponse(
+    status_code=200,
+    content={"message": "Staff status updated successfully", "id": updated_staff.id,
+             "companyId": updated_staff.company_id}
+  )
