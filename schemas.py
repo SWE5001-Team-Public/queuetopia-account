@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from humps import camelize
 from pydantic import BaseModel
 
@@ -13,9 +15,42 @@ class User(BaseModel):
   password: str
 
 
+class Staff(BaseModel):
+  email: str
+  first_name: str
+  last_name: str
+  c_id: int
+
+
+class StaffResponse(BaseModel):
+  id: str
+  u_id: int
+  email: str
+  first_name: str
+  last_name: str
+  display_id: str
+  role: str
+  email_confirmed: bool
+  deactivated: bool
+  company_id: int
+  created_at: datetime
+  updated_at: datetime
+  confirmed_at: datetime | None
+
+  class Config:
+    alias_generator = to_camel
+    populate_by_name = True  # Allows using both snake_case and camelCase
+    from_attributes = True  # Needed for ORM models
+
+
 class LoginRequest(BaseModel):
   email: str
   password: str
+
+
+class ChangeStatusRequest(BaseModel):
+  email: str
+  deactivated: bool
 
 
 class ConfirmEmailRequest(BaseModel):
