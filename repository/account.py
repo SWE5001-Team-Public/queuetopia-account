@@ -8,12 +8,13 @@ from encryption import get_password_hash
 from schemas import User
 
 
-async def create_user(db: AsyncSession, user: User):
+async def create_user(db: AsyncSession, user: User, role: str):
   """Create a new user."""
   db_user = UserTable(
     email=user.email,
     first_name=user.first_name,
     last_name=user.last_name,
+    role=role,
     password=get_password_hash(user.password),
     created_at=datetime.datetime.now(),
     updated_at=datetime.datetime.now(),

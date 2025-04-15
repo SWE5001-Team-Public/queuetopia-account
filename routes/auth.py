@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 import schemas
 from aws.sqs import send_message
+from constants.Role import Role
 from db.database import get_db
 from db.valkey_client import get_valkey
 from encryption import verify_password
@@ -24,7 +25,7 @@ async def register(user: schemas.User, db: AsyncSession = Depends(get_db)):
     raise HTTPException(status_code=400, detail="User already exists")
 
   try:
-    new_user = await crud.create_user(db, user)
+    new_user = await crud.create_user(db, user, Role.BUSINESS_OWNER)
 
     if not new_user:
       raise HTTPException(status_code=400, detail="Failed to create user")

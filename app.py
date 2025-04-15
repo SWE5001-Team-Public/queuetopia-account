@@ -1,10 +1,11 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+
 import uvicorn
 from dotenv import load_dotenv
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-from db.database import init_db
+from db.database import init_db, insert_static
 from routes import account, auth, company, store
 
 load_dotenv()
@@ -14,6 +15,7 @@ load_dotenv()
 async def lifespan(app: FastAPI):
   """Initialize the database at startup."""
   await init_db()
+  await insert_static()
   yield
 
 

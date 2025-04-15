@@ -7,6 +7,14 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from db.database import Base
 
 
+class RoleTable(Base):
+  __tablename__ = 'roles'
+
+  key = Column(String(100), primary_key=True, index=True, nullable=False)
+  value = Column(String(100), nullable=False)
+  hierarchy = Column(Integer, default=100, nullable=False)
+
+
 class UserTable(Base):
   __tablename__ = "users"
 
@@ -17,6 +25,7 @@ class UserTable(Base):
   last_name = Column(String, nullable=False)
   password = Column(String, nullable=False)
   email_confirmed = Column(Boolean, default=False)
+  role = Column(String, ForeignKey("roles.key", ondelete="CASCADE"), nullable=False)
   deactivated = Column(Boolean, default=False)
   created_at = Column(DateTime, default=datetime.datetime.now(), nullable=False)
   updated_at = Column(DateTime, default=datetime.datetime.now(), nullable=False)
