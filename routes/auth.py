@@ -157,11 +157,11 @@ async def confirm_email(body: schemas.ConfirmEmailRequest, db: AsyncSession = De
 
 
 @router.post("/change-password")
-async def change_password(body: schemas.LoginRequest, db: AsyncSession = Depends(get_db)):
+async def change_password(body: schemas.ChangePasswordRequest, db: AsyncSession = Depends(get_db)):
   user = await crud.change_password(db, body)
 
   if not user:
-    raise HTTPException(status_code=404, detail="Invalid request")
+    raise HTTPException(status_code=400, detail="Failed to change password")
 
   return JSONResponse(
     status_code=200,
