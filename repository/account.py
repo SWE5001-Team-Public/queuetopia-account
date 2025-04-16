@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from db.models import UserTable
-from encryption import get_password_hash
-from schemas import User, LoginRequest, ChangeStatusRequest
+from encryption import get_password_hash, verify_password
+from schemas import User, ChangeStatusRequest, ChangePasswordRequest
 
 
 async def create_user(db: AsyncSession, user: User, role: str, c_id: int = None):
@@ -60,14 +60,14 @@ async def confirm_email(db: AsyncSession, email: str):
   return user
 
 
-async def change_password(db: AsyncSession, req: LoginRequest):
+async def change_password(db: AsyncSession, req: ChangePasswordRequest):
   """Change a user's password."""
   user = await get_user_by_email(db, req.email)
 
-  if not user or user.email_confirmed:
+  if not user or not verify_password(req.old_password, user.password):
     return None
 
-  user.password = get_password_hash(req.password)
+  user.password = get_password_hash(req.new_password)
   user.updated_at = datetime.datetime.now()
 
   await db.commit()

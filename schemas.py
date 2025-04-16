@@ -32,7 +32,7 @@ class StaffResponse(BaseModel):
   role: str
   email_confirmed: bool
   deactivated: bool
-  company_id: int
+  company_id: int | None
   created_at: datetime
   updated_at: datetime
   confirmed_at: datetime | None
@@ -46,6 +46,12 @@ class StaffResponse(BaseModel):
 class LoginRequest(BaseModel):
   email: str
   password: str
+
+
+class ChangePasswordRequest(BaseModel):
+  email: str
+  old_password: str
+  new_password: str
 
 
 class ChangeStatusRequest(BaseModel):
