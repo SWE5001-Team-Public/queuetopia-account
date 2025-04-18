@@ -11,7 +11,7 @@ from aws.sqs import send_message
 from constants.Role import Role
 from db.database import get_db
 from db.valkey_client import get_valkey
-from encryption import verify_password
+from encryption import verify_password, generate_random_password
 from repository import account as crud
 from session_manager import get_current_user, invalidate_session, create_session
 
@@ -53,7 +53,7 @@ async def register_staff(staff: schemas.Staff, db: AsyncSession = Depends(get_db
     raise HTTPException(status_code=400, detail="User already exists")
 
   try:
-    password = "temp-123"
+    password = generate_random_password()
     new_user = schemas.User(email=staff.email, first_name=staff.first_name, last_name=staff.last_name,
                             password=password)
     new_staff = await crud.create_user(db, new_user, Role.EMPLOYEE, c_id=staff.c_id)
