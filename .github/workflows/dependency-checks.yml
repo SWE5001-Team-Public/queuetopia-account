@@ -155,11 +155,27 @@ jobs:
           load: true
 
       - name: Docker image scan
+        id: container-scan
         uses: anchore/scan-action@v3
         with:
           image: "account-mgr:latest"
           fail-build: true
           severity-cutoff: "critical"
+          output-format: table
+        continue-on-error: true
+
+      - name: Report scan results
+        if: always()
+        run: |
+          echo "### Container Security Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.container-scan.outcome }}" == "failure" ]; then
+            echo "❌ **SCAN FAILED**: Critical vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **SCAN PASSED**: No critical vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "See detailed report in the artifacts for more information." >> $GITHUB_STEP_SUMMARY
 
   license-compliance:
     runs-on: ubuntu-latest
