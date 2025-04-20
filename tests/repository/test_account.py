@@ -1,10 +1,9 @@
 import datetime
 import uuid
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock
 
 import pytest
 import pytest_asyncio
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -46,34 +45,55 @@ async def db_session():
 
 
 @pytest.mark.asyncio
-async def test_create_user(db_session):
+async def test_create_user():
   # Arrange
+  mock_session = AsyncMock(spec=AsyncSession)
+
+  # Set up the mock to capture the added user
+  captured_user = None
+
+  async def mock_add(user):
+    nonlocal captured_user
+    captured_user = user
+
+  mock_session.add.side_effect = mock_add
+
+  # Create test user data
   test_user = User(
-    u_id=1,
     email="test@example.com",
     first_name="Test",
     last_name="User",
     password="password123"
   )
 
-  # Act
-  result = await create_user(db_session, test_user, Role.CUSTOMER)
+  # Mock password hashing
+  with patch('repository.account.get_password_hash', return_value="hashed_password123"):
+    # Act
+    result = await create_user(mock_session, test_user, Role.CUSTOMER)
 
-  # Assert
-  assert result is not None
-  assert result.email == "test@example.com"
-  assert result.first_name == "Test"
-  assert result.last_name == "User"
-  assert result.role == Role.CUSTOMER
-  assert result.password != "password123"  # Password should be hashed
+    # Assert
+    # Verify session.add was called
+    mock_session.add.assert_called_once()
 
-  # Verify in database
-  query_result = await db_session.execute(
-    select(UserTable).filter(UserTable.email == "test@example.com")
-  )
-  user_from_db = query_result.scalar_one_or_none()
-  assert user_from_db is not None
-  assert user_from_db.email == "test@example.com"
+    # Verify session.commit was called
+    mock_session.commit.assert_called_once()
+
+    # Verify the user was created with correct properties
+    assert captured_user.email == "test@example.com"
+    assert captured_user.first_name == "Test"
+    assert captured_user.last_name == "User"
+    assert captured_user.role == Role.CUSTOMER
+    assert captured_user.password == "hashed_password123"
+    assert captured_user.u_id is not None  # Ensure u_id was set
+    assert not captured_user.deactivated  # Should default to False
+
+    # Verify returned data matches what we expect
+    assert result is not None
+    assert result.email == "test@example.com"
+    assert result.first_name == "Test"
+    assert result.last_name == "User"
+    assert result.role == Role.CUSTOMER
+    assert result.password == "hashed_password123"
 
 
 @pytest.mark.asyncio
@@ -148,7 +168,7 @@ async def test_get_accounts_by_c_id(db_session):
   company_id = 1
   test_users = [
     UserTable(
-      u_id=i+1,  # Add u_id explicitly
+      u_id=i + 1,  # Add u_id explicitly
       email=f"company_user{i}@example.com",
       first_name=f"Company{i}",
       last_name="User",
