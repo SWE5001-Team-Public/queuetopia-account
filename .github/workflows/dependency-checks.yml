@@ -6,6 +6,11 @@ on:
       - "**"
     paths:
       - .github/workflows/semgrep.yml
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/semgrep.yml
   schedule:
     - cron: "20 17 * * *" # Scan every day at 17:20 UTC.
   workflow_dispatch:
@@ -128,6 +133,7 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: semgrep-results.sarif
+          token: ${{ secrets.CODEQL_TOKEN }}
 
   infrastructure-security:
     runs-on: ubuntu-latest
