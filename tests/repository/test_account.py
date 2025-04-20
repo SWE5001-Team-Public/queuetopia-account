@@ -49,6 +49,7 @@ async def db_session():
 async def test_create_user(db_session):
   # Arrange
   test_user = User(
+    u_id=1,
     email="test@example.com",
     first_name="Test",
     last_name="User",
