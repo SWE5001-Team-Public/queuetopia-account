@@ -81,6 +81,7 @@ async def test_get_user_by_email(db_session):
   user_id = str(uuid.uuid4())
   test_user = UserTable(
     id=user_id,
+    u_id=1,
     email="get_test@example.com",
     first_name="Get",
     last_name="Test",
@@ -118,6 +119,7 @@ async def test_get_user_by_email_ignore_status(db_session):
   user_id = str(uuid.uuid4())
   test_user = UserTable(
     id=user_id,
+    u_id=2,
     email="ignore_status@example.com",
     first_name="Ignore",
     last_name="Status",
