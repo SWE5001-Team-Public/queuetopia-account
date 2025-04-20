@@ -119,7 +119,7 @@ async def test_get_user_by_email_ignore_status(db_session):
   user_id = str(uuid.uuid4())
   test_user = UserTable(
     id=user_id,
-    u_id=2,
+    u_id=1,
     email="ignore_status@example.com",
     first_name="Ignore",
     last_name="Status",
@@ -147,6 +147,7 @@ async def test_get_accounts_by_c_id(db_session):
   company_id = 1
   test_users = [
     UserTable(
+      u_id=i+1,  # Add u_id explicitly
       email=f"company_user{i}@example.com",
       first_name=f"Company{i}",
       last_name="User",
@@ -160,6 +161,7 @@ async def test_get_accounts_by_c_id(db_session):
 
   # Add a user with a different company_id
   different_company_user = UserTable(
+    u_id=4,
     email="different@example.com",
     first_name="Different",
     last_name="Company",
@@ -190,6 +192,7 @@ async def test_get_accounts_by_c_id(db_session):
 async def test_confirm_email(db_session):
   # Arrange - Create a test user with unconfirmed email
   test_user = UserTable(
+    u_id=1,
     email="unconfirmed@example.com",
     first_name="Unconfirmed",
     last_name="User",
@@ -226,6 +229,7 @@ async def test_change_password(db_session):
     patch('repository.account.get_password_hash', return_value="new_hashed_password"):
     # Arrange - Create a test user
     test_user = UserTable(
+      u_id=1,
       email="password@example.com",
       first_name="Password",
       last_name="Change",
@@ -262,6 +266,7 @@ async def test_change_password(db_session):
 async def test_change_status(db_session):
   # Arrange - Create a test user
   test_user = UserTable(
+    u_id=1,
     email="status@example.com",
     first_name="Status",
     last_name="Change",
