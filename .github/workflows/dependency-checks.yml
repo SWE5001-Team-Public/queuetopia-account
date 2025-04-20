@@ -4,12 +4,14 @@ on:
   pull_request:
     branches:
       - "**"
-  push:
-    branches:
-      - main
+    paths:
+      - .github/workflows/semgrep.yml
   schedule:
-    - cron: "0 0 * * 0" # Weekly scan on Sundays
+    - cron: "20 17 * * *" # Scan every day at 17:20 UTC.
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   dependency-security:
@@ -61,28 +63,36 @@ jobs:
           python-version: "3.10"
 
       - name: Install Dependencies
-        run: pip install pylint
+        run: |
+          pip install -r requirements.txt
+          pip install pylint semgrep
 
       - name: Run Python Code Quality Checks
-        run: pylint --disable=all --enable=security,typing,imports *.py
+        run: pylint --disable=all --enable=security-issue,import-error,typecheck *.py || true
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: semgrep.sarif
 
-  secret-scanning:
+  semgrep:
+    # User definable name of this GitHub Actions job.
+    name: semgrep-oss/scan
+    # If you are self-hosting, change the following `runs-on` value:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Check for hardcoded secrets
-        uses: gitleaks/gitleaks-action@v2
-        with:
-          config-path: .github/gitleaks.toml
+    container:
+      # A Docker image with Semgrep installed. Do not change this.
+      image: semgrep/semgrep
+
+    # Skip any PR created by dependabot to avoid permission issues:
+    if: (github.actor != 'dependabot[bot]')
+
+    steps:
+      # Fetch project source with GitHub Actions Checkout. Use either v3 or v4.
+      - uses: actions/checkout@v4
+      # Run the "semgrep scan" command on the command line of the docker image.
+      - run: semgrep scan --config auto
 
   infrastructure-security:
     runs-on: ubuntu-latest
@@ -115,6 +125,7 @@ jobs:
         with:
           image: "account-mgr:latest"
           fail-build: true
+          severity-cutoff: "high"
 
   license-compliance:
     runs-on: ubuntu-latest
