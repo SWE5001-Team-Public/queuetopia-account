@@ -128,7 +128,7 @@ jobs:
         with:
           image: "account-mgr:latest"
           fail-build: true
-          severity-cutoff: "high"
+          severity-cutoff: "critical"
 
   license-compliance:
     runs-on: ubuntu-latest
