@@ -98,6 +98,9 @@ jobs:
 
       - name: Run Semgrep scan
         run: |
+          # Install jq for JSON formatting
+          apt-get update && apt-get install -y jq
+
           # Run scan and generate JSON report
           semgrep scan --config auto --json > semgrep-results.json
 
@@ -105,13 +108,18 @@ jobs:
           echo "### Semgrep Security Scan Results" >> $GITHUB_STEP_SUMMARY
 
           # Extract and display findings count
-          FINDING_COUNT=$(cat semgrep-results.json | grep -o '"results":' | wc -l)
+          FINDING_COUNT=$(jq '.results | length' semgrep-results.json)
           echo "Total findings: $FINDING_COUNT" >> $GITHUB_STEP_SUMMARY
 
-          # Add summary of findings
+          # Add summary of findings in clean JSON format
           echo "#### Top findings:" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          cat semgrep-results.json | grep -A 2 '"message":' | head -n 15 >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          jq '.results[:5] | map({
+            path: .path,
+            line: .start.line,
+            message: .extra.message,
+            severity: .extra.severity
+          })' semgrep-results.json >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
           # Also generate SARIF format for GitHub code scanning integration
