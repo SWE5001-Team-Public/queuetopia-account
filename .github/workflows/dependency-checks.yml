@@ -68,12 +68,15 @@ jobs:
           pip install pylint semgrep
 
       - name: Run Python Code Quality Checks
-        run: pylint --disable=all --enable=security-issue,import-error,typecheck *.py || true
-
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: semgrep.sarif
+        run: |
+          PYLINT_OUTPUT=$(pylint --disable=all --enable=security-issue,import-error,typecheck *.py || true)
+          echo "$PYLINT_OUTPUT"
+          SCORE=$(echo "$PYLINT_OUTPUT" | grep -oP 'Your code has been rated at \K[0-9.]+' || echo "N/A")
+          echo "### Python Code Quality Score: $SCORE/10" >> $GITHUB_STEP_SUMMARY
+          echo "Full pylint output:" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "$PYLINT_OUTPUT" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
   semgrep:
     # User definable name of this GitHub Actions job.
