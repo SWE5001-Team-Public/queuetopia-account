@@ -4,7 +4,7 @@ import uuid
 from sqlalchemy import Column, String, ForeignKey, Integer, Sequence, Boolean, DateTime
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from db.database import Base
+from db.base import Base
 
 
 class RoleTable(Base):
