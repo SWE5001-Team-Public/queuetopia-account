@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import load_environment
@@ -38,19 +38,23 @@ app.add_middleware(
   allow_headers=["*"],
 )
 
+router = APIRouter(prefix="/account-mgr")
+
 
 # Health check endpoint
-@app.get("/health", tags=["System"])
+@router.get("/health", tags=["System"])
 async def health_check():
   """Health check endpoint for monitoring service status."""
   return {"status": "healthy"}
 
 
 # Other routes
-app.include_router(auth.router, tags=["Authentication"])
-app.include_router(account.router, prefix="/account", tags=["Account"])
-app.include_router(company.router, prefix="/company", tags=["Company"])
-app.include_router(store.router, prefix="/store", tags=["Store"])
+router.include_router(auth.router, tags=["Authentication"])
+router.include_router(account.router, prefix="/account", tags=["Account"])
+router.include_router(company.router, prefix="/company", tags=["Company"])
+router.include_router(store.router, prefix="/store", tags=["Store"])
+
+app.include_router(router)
 
 if __name__ == "__main__":
   uvicorn.run("app:app", host="0.0.0.0", port=5005)
