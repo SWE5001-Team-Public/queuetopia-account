@@ -33,10 +33,12 @@ ssl_context = ssl.create_default_context() if ENVIRONMENT == "prod" else None
 engine = create_async_engine(
   DATABASE_URL,
   echo=True,
+  pool_pre_ping=True,
   connect_args={"ssl": ssl_context} if ssl_context else {}
 )
 
 SessionLocal = sessionmaker(
+  bind=engine,
   autocommit=False,
   autoflush=False,
   class_=AsyncSession,
@@ -250,5 +252,10 @@ async def insert_test_data():
 
 # Dependency for async DB session
 async def get_db():
-  async with SessionLocal(bind=engine) as session:
-    yield session
+    async with SessionLocal() as session:
+        try:
+            yield session
+            await session.commit()
+        except:
+            await session.rollback()
+            raise

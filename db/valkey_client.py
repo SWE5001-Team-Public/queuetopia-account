@@ -23,7 +23,7 @@ VALKEY_DB = os.getenv("VALKEY_DB", 0)
 redis_pool = redis.ConnectionPool(
   host=VALKEY_HOST,
   port=int(VALKEY_PORT),
-  password=VALKEY_PASSWORD,
+  #password=VALKEY_PASSWORD,
   db=int(VALKEY_DB),
   decode_responses=True  # Automatically decode responses to Python strings
 )
