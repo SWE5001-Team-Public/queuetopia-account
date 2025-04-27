@@ -19,15 +19,22 @@ VALKEY_PORT = os.getenv("VALKEY_PORT", 6379)
 VALKEY_PASSWORD = os.getenv("VALKEY_PASSWORD", "magical_password")
 VALKEY_DB = os.getenv("VALKEY_DB", 0)
 
-# Create a Redis connection pool
-redis_pool = redis.ConnectionPool(
-  host=VALKEY_HOST,
-  port=int(VALKEY_PORT),
-  #password=VALKEY_PASSWORD,
-  db=int(VALKEY_DB),
-  decode_responses=True  # Automatically decode responses to Python strings
-)
-
+# Create Redis connection pool differently based on environment
+if ENVIRONMENT == "local":
+    redis_pool = redis.ConnectionPool(
+        host=VALKEY_HOST,
+        port=int(VALKEY_PORT),
+        password=VALKEY_PASSWORD,
+        db=int(VALKEY_DB),
+        decode_responses=True
+    )
+else:  # prod or others
+    redis_pool = redis.ConnectionPool(
+        host=VALKEY_HOST,
+        port=int(VALKEY_PORT),
+        db=int(VALKEY_DB),
+        decode_responses=True
+    )
 
 # Create a Redis client using the connection pool
 async def get_valkey():
