@@ -38,7 +38,6 @@ engine = create_async_engine(
 )
 
 SessionLocal = sessionmaker(
-  bind=engine,
   autocommit=False,
   autoflush=False,
   class_=AsyncSession,
@@ -252,10 +251,5 @@ async def insert_test_data():
 
 # Dependency for async DB session
 async def get_db():
-    async with SessionLocal() as session:
-        try:
-            yield session
-            await session.commit()
-        except:
-            await session.rollback()
-            raise
+  async with SessionLocal(bind=engine) as session:
+     yield session
